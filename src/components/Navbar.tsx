@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Our Story", href: "/#about" },
@@ -11,14 +13,31 @@ const navLinks = [
 ];
 
 const Navbar = () => {
-  const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+  const currentHash = location.hash;
+
+  const [scrolled, setScrolled] = useState(!isHome);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const isActiveLink = (href: string) => {
+    if (href.startsWith("/#")) {
+      return isHome && currentHash === href.slice(1);
+    }
+    return location.pathname === href;
+  };
+
   useEffect(() => {
+    if (!isHome) {
+      setScrolled(true);
+      return;
+    }
+
     const handleScroll = () => setScrolled(window.scrollY > 50);
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isHome]);
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -49,7 +68,12 @@ const Navbar = () => {
               <a
                 key={link.label}
                 href={link.href}
-                className="font-sans-refined text-xs tracking-[0.15em] uppercase text-cream/70 hover:text-cream transition-colors duration-300"
+                className={cn(
+                  "font-sans-refined text-xs tracking-[0.15em] uppercase transition-colors duration-300",
+                  isActiveLink(link.href)
+                    ? "text-cream"
+                    : "text-cream/70 hover:text-cream"
+                )}
               >
                 {link.label}
               </a>
@@ -109,7 +133,12 @@ const Navbar = () => {
               key={link.label}
               href={link.href}
               onClick={() => setDrawerOpen(false)}
-              className="font-sans-refined text-sm tracking-[0.12em] uppercase text-cream/70 hover:text-cream py-3 border-b border-cream/10 transition-colors duration-300"
+              className={cn(
+                "font-sans-refined text-sm tracking-[0.12em] uppercase py-3 border-b border-cream/10 transition-colors duration-300",
+                isActiveLink(link.href)
+                  ? "text-cream"
+                  : "text-cream/70 hover:text-cream"
+              )}
             >
               {link.label}
             </a>
