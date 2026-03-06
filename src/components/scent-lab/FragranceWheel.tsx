@@ -55,6 +55,8 @@ const FragranceWheel = ({
   const dragging = useRef(false);
   const startAngle = useRef(0);
   const startRot = useRef(0);
+  const touchStartPos = useRef({ x: 0, y: 0 });
+  const dragThreshold = 10;
 
   const getAngle = (clientX: number, clientY: number) => {
     if (!svgRef.current) return 0;
@@ -79,16 +81,67 @@ const FragranceWheel = ({
     [onRotate, disabled]
   );
 
-  const onPointerDown = (e: React.PointerEvent) => {
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (disabled) return;
+    
+    const touch = e.touches[0];
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    dragging.current = true;
+    startAngle.current = getAngle(touch.clientX, touch.clientY);
+    startRot.current = knobRotation;
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (disabled) return;
+    
+    // Prevent default touch behavior
+    if (e.pointerType === 'touch') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     dragging.current = true;
     startAngle.current = getAngle(e.clientX, e.clientY);
     startRot.current = knobRotation;
     (e.target as SVGElement).setPointerCapture?.(e.pointerId);
   };
 
-  const onPointerMove = (e: React.PointerEvent) => {
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!dragging.current || disabled) return;
+    
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
+    const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
+    
+    // Check if drag threshold is met
+    if (deltaX < dragThreshold && deltaY < dragThreshold) {
+      return;
+    }
+    
+    const angle = getAngle(touch.clientX, touch.clientY);
+    let delta = angle - startAngle.current;
+    
+    // Handle angle wrapping for smooth rotation
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    
+    // Apply rotation relative to starting position
+    const newRotation = startRot.current + delta;
+    setKnobRotation(newRotation);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragging.current || disabled) return;
+    
+    // Prevent default touch behavior
+    if (e.pointerType === 'touch') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     
     const currentAngle = getAngle(e.clientX, e.clientY);
     let delta = currentAngle - startAngle.current;
@@ -102,7 +155,15 @@ const FragranceWheel = ({
     setKnobRotation(newRotation);
   };
 
-  const onPointerUp = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!dragging.current) return;
+    dragging.current = false;
+    snap(knobRotation);
+  };
+
+  const handlePointerUp = () => {
     if (!dragging.current) return;
     dragging.current = false;
     snap(knobRotation);
@@ -123,6 +184,10 @@ const FragranceWheel = ({
           ref={svgRef}
           viewBox={`0 0 ${SIZE} ${SIZE}`}
           className="w-full h-full"
+          style={{ touchAction: 'none' }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
         <defs>
           {/* Glow filter */}
@@ -377,9 +442,12 @@ const FragranceWheel = ({
                   onConfirm();
                 }
               }}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
               className={disabled ? "cursor-default" : "cursor-pointer"}
               style={{ touchAction: "none" }}
             />
@@ -387,9 +455,12 @@ const FragranceWheel = ({
             {/* Rotating ring - drag/rotation zone */}
             <g
               ref={knobRef}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
               className={disabled ? "cursor-default" : "cursor-grab active:cursor-grabbing"}
               style={{ touchAction: "none" }}
             >
