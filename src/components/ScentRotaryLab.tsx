@@ -201,8 +201,7 @@ const ScentRotaryLab = () => {
           {/* Right: Note Panel / Summary - only show after first confirmation */}
           {family1 && (
             <motion.div 
-              // Ensure the notes panel stays roughly aligned with the wheel's top edge
-              className="lg:sticky lg:top-32 lg:self-start min-h-[300px]"
+              className="lg:sticky lg:top-24 lg:self-start min-h-[300px]"
               variants={panelVariants}
               initial="hidden"
               animate="visible"
