@@ -19,14 +19,14 @@ interface FragranceWheelProps {
 const getResponsiveSize = () => {
   if (typeof window !== 'undefined') {
     const width = window.innerWidth;
-    if (width < 768) { // Mobile - ultra-tiny (eighth size)
+    if (width < 768) { // Mobile - 1x smaller (half size)
       return {
-        SIZE: 30,
-        CENTER: 15,
-        OUTER_R: 15,
-        INNER_R: 8,
-        KNOB_R: 8,
-        LABEL_R: (15 + 8) / 2
+        SIZE: 120,
+        CENTER: 60,
+        OUTER_R: 60,
+        INNER_R: 33,
+        KNOB_R: 32,
+        LABEL_R: (60 + 33) / 2
       };
     } else if (width < 1024) { // Tablet
       return {
@@ -54,11 +54,11 @@ const getResponsiveSize = () => {
 const getResponsiveFonts = () => {
   if (typeof window !== 'undefined') {
     const width = window.innerWidth;
-    if (width < 768) { // Mobile - microscopic fonts for ultra-tiny wheel
+    if (width < 768) { // Mobile - tiny fonts for tiny wheel
       return {
-        labelSize: "3px",
-        labelSizeSmall: "2px",
-        centerTextSize: "4px"
+        labelSize: "6px",
+        labelSizeSmall: "4px",
+        centerTextSize: "8px"
       };
     } else if (width < 1024) { // Tablet
       return {
