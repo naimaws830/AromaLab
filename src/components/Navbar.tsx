@@ -4,8 +4,8 @@ import { Menu, X } from "lucide-react";
 
 const navLinks = [
   { label: "Our Story", href: "/#about" },
-  { label: "Our Perfumes", href: "/#perfumes" },
-  { label: "Digital Scent Lab", href: "/#digital-scent-lab" },
+  { label: "Our Perfumes", href: "/perfumes" },
+  { label: "Digital Scent Lab", href: "/digital-scent-lab" },
   { label: "What We Offer", href: "/#services" },
   { label: "Contact", href: "/#contact" },
 ];
