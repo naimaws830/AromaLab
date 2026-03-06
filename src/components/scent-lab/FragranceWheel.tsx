@@ -15,12 +15,70 @@ interface FragranceWheelProps {
   dimKnob?: boolean;
 }
 
-const SIZE = 500;
-const CENTER = SIZE / 2;
-const OUTER_R = 250;
-const INNER_R = 140;
-const KNOB_R = 135;
-const LABEL_R = (OUTER_R + INNER_R) / 2;
+// Responsive sizing based on device
+const getResponsiveSize = () => {
+  if (typeof window !== 'undefined') {
+    const width = window.innerWidth;
+    if (width < 768) { // Mobile - ultra-tiny (eighth size)
+      return {
+        SIZE: 30,
+        CENTER: 15,
+        OUTER_R: 15,
+        INNER_R: 8,
+        KNOB_R: 8,
+        LABEL_R: (15 + 8) / 2
+      };
+    } else if (width < 1024) { // Tablet
+      return {
+        SIZE: 420,
+        CENTER: 210,
+        OUTER_R: 210,
+        INNER_R: 118,
+        KNOB_R: 113,
+        LABEL_R: (210 + 118) / 2
+      };
+    }
+  }
+  // Desktop (default)
+  return {
+    SIZE: 500,
+    CENTER: 250,
+    OUTER_R: 250,
+    INNER_R: 140,
+    KNOB_R: 135,
+    LABEL_R: (250 + 140) / 2
+  };
+};
+
+// Responsive font sizes
+const getResponsiveFonts = () => {
+  if (typeof window !== 'undefined') {
+    const width = window.innerWidth;
+    if (width < 768) { // Mobile - microscopic fonts for ultra-tiny wheel
+      return {
+        labelSize: "3px",
+        labelSizeSmall: "2px",
+        centerTextSize: "4px"
+      };
+    } else if (width < 1024) { // Tablet
+      return {
+        labelSize: "14px",
+        labelSizeSmall: "10px",
+        centerTextSize: "20px"
+      };
+    }
+  }
+  // Desktop (default)
+  return {
+    labelSize: "16px",
+    labelSizeSmall: "12px",
+    centerTextSize: "24px"
+  };
+};
+
+const responsive = getResponsiveSize();
+const { SIZE, CENTER, OUTER_R, INNER_R, KNOB_R, LABEL_R } = responsive;
+const { labelSize, labelSizeSmall, centerTextSize } = getResponsiveFonts();
 
 function polarToXY(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
@@ -315,7 +373,7 @@ const FragranceWheel = ({
                     dominantBaseline="central"
                     className="font-sans-refined select-none pointer-events-none"
                     style={{
-                      fontSize: isSelected || isConfirmed ? "16px" : "12px",
+                      fontSize: isSelected || isConfirmed ? labelSize : labelSizeSmall,
                       fontWeight: isSelected || isConfirmed ? 700 : 500,
                       fill: isDimmed
                         ? "rgba(255,255,255,0.3)"
@@ -336,7 +394,7 @@ const FragranceWheel = ({
                     dominantBaseline="central"
                     className="font-sans-refined select-none pointer-events-none"
                     style={{
-                      fontSize: isSelected || isConfirmed ? "16px" : "12px",
+                      fontSize: isSelected || isConfirmed ? labelSize : labelSizeSmall,
                       fontWeight: isSelected || isConfirmed ? 700 : 500,
                       fill: isDimmed
                         ? "rgba(255,255,255,0.3)"
@@ -360,7 +418,7 @@ const FragranceWheel = ({
                   dominantBaseline="central"
                   className="font-sans-refined select-none pointer-events-none"
                   style={{
-                    fontSize: isSelected || isConfirmed ? "16px" : "12px",
+                    fontSize: isSelected || isConfirmed ? labelSize : labelSizeSmall,
                     fontWeight: isSelected || isConfirmed ? 700 : 500,
                     fill: isDimmed
                       ? "rgba(255,255,255,0.3)"
@@ -473,7 +531,7 @@ const FragranceWheel = ({
                 y={CENTER + 15}
                 textAnchor="middle"
                 style={{
-                  fontSize: "24px",
+                  fontSize: centerTextSize,
                   fill: "rgba(0,0,0,0.25)",
                   letterSpacing: "0.2em",
                   fontFamily: "'Raleway', sans-serif",

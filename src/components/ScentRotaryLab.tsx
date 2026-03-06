@@ -167,20 +167,20 @@ const ScentRotaryLab = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className={`${
-            family1 ? "grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start" : "flex justify-center"
+            family1 ? "flex flex-col items-center lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start" : "flex justify-center"
           }`}
         >
           {/* Wheel container */}
           <div
             className={`flex flex-col items-center transition-all duration-500 ease-in-out ${
-              family1 ? "" : ""
+              family1 ? "lg:order-1" : ""
             }`}
           >
             <motion.div
               className="flex flex-col items-center gap-8"
               layout
               variants={wheelVariants}
-              animate={family1 ? "left" : "centered"}
+              animate={family1 ? "centered" : "centered"}
               transition={{ duration: 0.6, ease: "easeInOut" }}
             >
               <FragranceWheel
@@ -201,8 +201,8 @@ const ScentRotaryLab = () => {
           {/* Right: Note Panel / Summary - only show after first confirmation */}
           {family1 && (
             <motion.div 
-              // Ensure the notes panel stays roughly aligned with the wheel's top edge
-              className="lg:sticky lg:top-32 lg:self-start min-h-[300px]"
+              // Ensure the notes panel stays roughly aligned with the wheel's top edge on desktop
+              className="lg:sticky lg:top-32 lg:self-start min-h-[300px] lg:order-2"
               variants={panelVariants}
               initial="hidden"
               animate="visible"
