@@ -18,27 +18,23 @@ const AboutSection = () => {
             transition={{ duration: 0.8 }}
           >
             <h2 className="font-serif-display text-4xl md:text-5xl text-foreground mb-8">
-              About <span className="text-gradient-amber">AromaLab</span>
+              Our Story of <span className="text-gradient-amber">AromaLab</span>
             </h2>
 
             <div className="space-y-5 font-serif-body text-xl md:text-2xl leading-relaxed text-muted-foreground">
               <p>
-                AromaLab was born from a lifelong passion for the art of scent
-                and a simple belief: every person deserves a fragrance as unique
-                as their identity. What started as a small atelier experiment
-                grew into a studio where science meets soul, and every bottle
-                tells a personal story.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                enim ad minim veniam, quis nostrud exercitation ullamco laboris.
               </p>
+              <p>                
+                Duis aute irure dolor in reprehenderit in voluptate velit esse
+                cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                cupidatat non proident, sunt in culpa qui officia deserunt.</p>
               <p>
-                Our mission is to make luxury custom perfume crafting accessible,
-                personal, and meaningful. We guide you through the creative
-                process — from selecting individual notes to designing the final
-                bottle — so the fragrance you wear is truly yours.
-              </p>
-              <p>
-                We are committed to using only natural, handpicked ingredients
-                sourced from ethical suppliers around the world, blended by
-                skilled artisans who treat every drop as a work of art.
+                Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+                accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
+                quae ab illo inventore veritatis et quasi architecto.
               </p>
             </div>
           </motion.div>

@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { label: "About", href: "#about" },
-  { label: "Our Perfumes", href: "#perfumes" },
-  { label: "Digital Scent Lab", href: "#scent-lab" },
-  { label: "What We Offer", href: "#services" },
-  { label: "Contact", href: "#contact" },
+  { label: "Our Story", href: "/#about" },
+  { label: "Our Perfumes", href: "/perfumes" },
+  { label: "Digital Scent Lab", href: "/digital-scent-lab" },
+  { label: "What We Offer", href: "/#services" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 const Navbar = () => {
@@ -39,7 +39,7 @@ const Navbar = () => {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <a href="#" className="font-serif-display text-xl md:text-2xl text-cream tracking-wide">
+                   <a href="/" className="font-serif-display text-xl md:text-2xl text-cream tracking-wide">
             Aroma<span className="text-gradient-amber">Lab</span>
           </a>
 
@@ -58,7 +58,7 @@ const Navbar = () => {
 
           <div className="flex items-center gap-4">
             <a
-              href="#contact"
+              href="/#contact"
               className="hidden sm:inline-block px-6 py-2.5 bg-accent text-cream font-sans-refined text-xs tracking-[0.15em] uppercase rounded-sm hover:bg-accent/90 transition-all duration-300"
             >
               Book Now
@@ -115,7 +115,7 @@ const Navbar = () => {
             </a>
           ))}
           <a
-            href="#contact"
+            href="/#contact"
             onClick={() => setDrawerOpen(false)}
             className="mt-6 text-center px-6 py-3 bg-accent text-cream font-sans-refined text-xs tracking-[0.15em] uppercase rounded-sm hover:bg-accent/90 transition-all duration-300"
           >

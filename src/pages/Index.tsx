@@ -3,8 +3,6 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import VideoHero from "@/components/VideoHero";
 import AboutSection from "@/components/AboutSection";
-import PerfumeGrid from "@/components/PerfumeGrid";
-import ScentRotaryLab from "@/components/ScentRotaryLab";
 import WhatWeOffer from "@/components/WhatWeOffer";
 import ContactSection from "@/components/ContactSection";
 import FooterSection from "@/components/FooterSection";
@@ -58,8 +56,6 @@ const Index = () => {
         className="relative z-10"
       >
         <SectionReveal><AboutSection /></SectionReveal>
-        <SectionReveal delay={0.1}><PerfumeGrid /></SectionReveal>
-        <SectionReveal delay={0.1}><ScentRotaryLab /></SectionReveal>
         <SectionReveal delay={0.1}><WhatWeOffer /></SectionReveal>
         <SectionReveal delay={0.1}><ContactSection /></SectionReveal>
         <FooterSection />
