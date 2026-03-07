@@ -15,70 +15,52 @@ interface FragranceWheelProps {
   dimKnob?: boolean;
 }
 
-// Responsive sizing based on device
+// Responsive sizing based on viewport width
 const getResponsiveSize = () => {
   if (typeof window !== 'undefined') {
-    const width = window.innerWidth;
-    if (width < 768) { // Mobile - 1x smaller (half size)
-      return {
-        SIZE: 120,
-        CENTER: 60,
-        OUTER_R: 60,
-        INNER_R: 33,
-        KNOB_R: 32,
-        LABEL_R: (60 + 33) / 2
-      };
-    } else if (width < 1024) { // Tablet
-      return {
-        SIZE: 420,
-        CENTER: 210,
-        OUTER_R: 210,
-        INNER_R: 118,
-        KNOB_R: 113,
-        LABEL_R: (210 + 118) / 2
-      };
-    }
+    const vw = window.innerWidth / 100; // 1vw in pixels
+    const containerSize = Math.min(window.innerWidth * 0.9, 500); // min(90vw, 500px)
+    
+    // Calculate sizes relative to container
+    const scale = containerSize / 500; // Scale factor relative to desktop size
+    
+    return {
+      SIZE: containerSize,
+      CENTER: containerSize / 2,
+      OUTER_R: containerSize / 2,
+      INNER_R: (containerSize / 2) * 0.56, // Proportional to desktop ratio
+      KNOB_R: (containerSize / 2) * 0.54, // Proportional to desktop ratio
+      LABEL_R: ((containerSize / 2) + ((containerSize / 2) * 0.56)) / 2,
+      scale: scale
+    };
   }
-  // Desktop (default)
+  // Desktop fallback
   return {
     SIZE: 500,
     CENTER: 250,
     OUTER_R: 250,
     INNER_R: 140,
     KNOB_R: 135,
-    LABEL_R: (250 + 140) / 2
+    LABEL_R: (250 + 140) / 2,
+    scale: 1
   };
 };
 
-// Responsive font sizes
-const getResponsiveFonts = () => {
-  if (typeof window !== 'undefined') {
-    const width = window.innerWidth;
-    if (width < 768) { // Mobile - tiny fonts for tiny wheel
-      return {
-        labelSize: "6px",
-        labelSizeSmall: "4px",
-        centerTextSize: "8px"
-      };
-    } else if (width < 1024) { // Tablet
-      return {
-        labelSize: "14px",
-        labelSizeSmall: "10px",
-        centerTextSize: "20px"
-      };
-    }
-  }
-  // Desktop (default)
+// Responsive font sizes using clamp()
+const getResponsiveFonts = (scale: number) => {
   return {
-    labelSize: "16px",
-    labelSizeSmall: "12px",
-    centerTextSize: "24px"
+    labelSize: `clamp(${10 * scale}px, ${1.5 * scale}vw, ${16 * scale}px)`,
+    labelSizeSmall: `clamp(${8 * scale}px, ${1.2 * scale}vw, ${12 * scale}px)`,
+    centerTextSize: `clamp(${12 * scale}px, ${2 * scale}vw, ${24 * scale}px)`,
+    notchWidth: `${10 * scale}px`,
+    notchHeight: `${30 * scale}px`,
+    notchRadius: `${3 * scale}px`
   };
 };
 
 const responsive = getResponsiveSize();
-const { SIZE, CENTER, OUTER_R, INNER_R, KNOB_R, LABEL_R } = responsive;
-const { labelSize, labelSizeSmall, centerTextSize } = getResponsiveFonts();
+const { SIZE, CENTER, OUTER_R, INNER_R, KNOB_R, LABEL_R, scale } = responsive;
+const { labelSize, labelSizeSmall, centerTextSize, notchWidth, notchHeight, notchRadius } = getResponsiveFonts(scale);
 
 function polarToXY(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
@@ -237,7 +219,14 @@ const FragranceWheel = ({
 
   return (
     <AnimatePresence>
-      <div className="relative w-full max-w-[500px] mx-auto h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px] aspect-square">
+      <div 
+        className="relative w-full mx-auto h-full min-h-[200px] aspect-square"
+        style={{ 
+          width: 'min(90vw, 500px)',
+          maxWidth: '500px',
+          margin: '0 auto'
+        }}
+      >
         <svg
           ref={svgRef}
           viewBox={`0 0 ${SIZE} ${SIZE}`}
@@ -545,25 +534,25 @@ const FragranceWheel = ({
               {/* Rotating indicator notch */}
               <g>
                 <rect
-                  x={CENTER - 2}
-                  y={CENTER - KNOB_R + 15}
-                  width={10}
-                  height={30}
-                  rx={3}
+                  x={CENTER - (2 * scale)}
+                  y={CENTER - KNOB_R + (15 * scale)}
+                  width={10 * scale}
+                  height={30 * scale}
+                  rx={3 * scale}
                   fill="hsl(48, 90%, 60%)"
                   stroke="hsl(38, 80%, 50%)"
-                  strokeWidth="1"
+                  strokeWidth={1 * scale}
                   // Keep the notch pointing at the currently selected segment (top center) by
                   // counter-rotating it relative to the knob's overall rotation.
                   transform={`rotate(${-knobRotation + 5}deg)`}
                 />
                 {/* Notch glow */}
                 <rect
-                  x={CENTER - 2}
-                  y={CENTER - KNOB_R + 15}
-                  width={10}
-                  height={30}
-                  rx={3}
+                  x={CENTER - (2 * scale)}
+                  y={CENTER - KNOB_R + (15 * scale)}
+                  width={10 * scale}
+                  height={30 * scale}
+                  rx={3 * scale}
                   fill="hsl(48, 90%, 60%)"
                   opacity="0.7"
                   filter="url(#segmentGlow)"

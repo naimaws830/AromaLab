@@ -172,9 +172,7 @@ const ScentRotaryLab = () => {
         >
           {/* Wheel container */}
           <div
-            className={`flex flex-col items-center transition-all duration-500 ease-in-out ${
-              family1 ? "lg:order-1" : ""
-            }`}
+            className={`flex flex-col items-center transition-all duration-500 ease-in-out lg:mt-8 mt-4`}
           >
             <motion.div
               className="flex flex-col items-center gap-8"
@@ -201,8 +199,8 @@ const ScentRotaryLab = () => {
           {/* Right: Note Panel / Summary - only show after first confirmation */}
           {family1 && (
             <motion.div 
-              // Ensure the notes panel stays roughly aligned with the wheel's top edge on desktop
-              className="lg:sticky lg:top-32 lg:self-start min-h-[300px] lg:order-2"
+              // Align notes panel with wheel positioning on all screen sizes
+              className="lg:sticky lg:top-32 lg:self-start min-h-[300px] lg:order-2 mt-8"
               variants={panelVariants}
               initial="hidden"
               animate="visible"
