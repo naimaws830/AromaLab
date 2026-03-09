@@ -1,226 +1,325 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Star, ShoppingCart } from "lucide-react";
+import blossomVeil from "@/assets/perfume-blossom-veil.png";
+import forestWhisper from "@/assets/perfume-forest-whisper.png";
+import mysticEmber from "@/assets/perfume-mystic-ember.png";
+import sunlitZest from "@/assets/perfume-sunlit-zest.png";
+import caramelDrift from "@/assets/perfume-caramel-drift.png";
 
-const perfumes = [
+const catalogItems = [
   {
     name: "Blossom Veil",
-    video: "/videos/perfume1.mp4",
-    family: "Floral",
-    description:
-      "A velvety embrace of Bulgarian rose and peony, laced with powdery iris and warm skin musk.",
+    image: blossomVeil,
+    rating: 4.9,
+    sold: "1.8k",
+    originalPrice: 199,
+    impressionPrice: 139,
+    plusNotePrice: 159,
+    discount: 30,
+    tag: "Best Seller",
+    freeShipping: true,
   },
   {
     name: "Forest Whisper",
-    video: "/videos/perfume2.mp4",
-    family: "Woody",
-    description:
-      "Deep amber resin and cedarwood grounded in rich vetiver and sun-baked earth.",
+    image: forestWhisper,
+    rating: 4.8,
+    sold: "980",
+    originalPrice: 219,
+    impressionPrice: 159,
+    plusNotePrice: 179,
+    discount: 27,
+    tag: "Mall",
+    freeShipping: true,
   },
   {
     name: "Mystic Ember",
-    video: "/videos/perfume3.mp4",
-    family: "Oriental",
-    description:
-      "Smoldering oud and black leather wrapped in saffron smoke and dark vanilla.",
+    image: mysticEmber,
+    rating: 4.9,
+    sold: "2.1k",
+    originalPrice: 239,
+    impressionPrice: 179,
+    plusNotePrice: 199,
+    discount: 25,
+    tag: "Flash Sale",
+    freeShipping: false,
   },
   {
     name: "Sunlit Zest",
-    video: "/videos/perfume4.mp4",
-    family: "Citrus",
-    description:
-      "Bright neroli and bergamot kissed by white tea and sunlit driftwood.",
+    image: sunlitZest,
+    rating: 4.7,
+    sold: "760",
+    originalPrice: 189,
+    impressionPrice: 129,
+    plusNotePrice: 149,
+    discount: 32,
+    tag: "Just In",
+    freeShipping: true,
   },
   {
     name: "Caramel Drift",
-    video: "/videos/perfume5.mp4",
-    family: "Gourmand",
-    description:
-      "Rich salted caramel meets honeyed tobacco with a warm vanilla trail.",
+    image: caramelDrift,
+    rating: 4.8,
+    sold: "1.2k",
+    originalPrice: 229,
+    impressionPrice: 169,
+    plusNotePrice: 189,
+    discount: 26,
+    tag: "Top Rated",
+    freeShipping: false,
+  },
+  {
+    name: "Blossom Veil Signature",
+    image: blossomVeil,
+    rating: 4.9,
+    sold: "640",
+    originalPrice: 329,
+    impressionPrice: 259,
+    plusNotePrice: 279,
+    discount: 21,
+    tag: "Value Pack",
+    freeShipping: true,
+  },
+  {
+    name: "Mystic Ember Discovery",
+    image: mysticEmber,
+    rating: 4.8,
+    sold: "420",
+    originalPrice: 109,
+    impressionPrice: 79,
+    plusNotePrice: 99,
+    discount: 28,
+    tag: "Bundle",
+    freeShipping: true,
+  },
+  {
+    name: "Forest Whisper Gift Box",
+    image: forestWhisper,
+    rating: 4.8,
+    sold: "350",
+    originalPrice: 259,
+    impressionPrice: 199,
+    plusNotePrice: 219,
+    discount: 23,
+    tag: "Limited",
+    freeShipping: false,
   },
 ];
 
-const TOTAL = perfumes.length;
+const sortOptions = ["Popular", "Latest", "Top Sales", "Price"];
+const heroSlides = [
+  {
+    title: "Blossom Veil",
+    subtitle: "Romantic floral with airy musk and powdery iris",
+    image: blossomVeil,
+    promo: "Up to 30% OFF",
+  },
+  {
+    title: "Forest Whisper",
+    subtitle: "Earthy cedarwood and resin blend for deeper moods",
+    image: forestWhisper,
+    promo: "Limited Bundle",
+  },
+  {
+    title: "Mystic Ember",
+    subtitle: "Bold oud, saffron smoke, and dark vanilla trail",
+    image: mysticEmber,
+    promo: "Flash Sale Today",
+  },
+  {
+    title: "Sunlit Zest",
+    subtitle: "Bright citrus profile for fresh daytime wear",
+    image: sunlitZest,
+    promo: "Free Shipping",
+  },
+];
 
-const PerfumeCarousel = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const scrollCooldown = useRef(false);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+const PerfumeGrid = () => {
+  const [activeSlide, setActiveSlide] = useState(0);
 
-  const rotate = useCallback((dir: number) => {
-    setActiveIndex((prev) => (prev + dir + TOTAL) % TOTAL);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => window.clearInterval(timer);
   }, []);
 
-  // Play/pause videos based on active index
-  useEffect(() => {
-    videoRefs.current.forEach((video, i) => {
-      if (!video) return;
-      if (i === activeIndex) {
-        video.play().catch(() => {});
-      } else {
-        video.pause();
-        video.currentTime = 0;
-      }
-    });
-  }, [activeIndex]);
-
-
-  // Keyboard arrows
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") rotate(1);
-      if (e.key === "ArrowLeft") rotate(-1);
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [rotate]);
-
-  // Touch swipe support
-  const touchStart = useRef<number | null>(null);
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStart.current = e.touches[0].clientX;
-  };
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStart.current === null) return;
-    const diff = touchStart.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) {
-      rotate(diff > 0 ? 1 : -1);
-    }
-    touchStart.current = null;
+  const goPrev = () => {
+    setActiveSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
-  const getSlotStyle = (offset: number) => {
-    if (offset === 0) return { x: "0%", scale: 1, z: 20, opacity: 1 };
-    return { x: offset > 0 ? "100%" : "-100%", scale: 0.6, z: 0, opacity: 0 };
+  const goNext = () => {
+    setActiveSlide((prev) => (prev + 1) % heroSlides.length);
   };
 
   return (
-    <section
-      id="perfumes"
-      ref={sectionRef}
-      className="py-24 md:py-32 bg-gradient-section overflow-hidden"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
-        >
-          <p className="font-sans-refined text-xs tracking-[0.35em] uppercase text-muted-foreground mb-4">
-            Our Collection
-          </p>
-          <h2 className="font-serif-display text-4xl md:text-5xl font-medium text-foreground">
-            Sample Our <span className="italic text-primary">Signatures</span>
-          </h2>
-        </motion.div>
-
-        {/* Carousel */}
-        <div className="relative h-[350px] md:h-[450px] flex items-center justify-center">
-          {perfumes.map((perfume, i) => {
-            let offset = i - activeIndex;
-            if (offset > Math.floor(TOTAL / 2)) offset -= TOTAL;
-            if (offset < -Math.floor(TOTAL / 2)) offset += TOTAL;
-
-            const style = getSlotStyle(offset);
-            const isActive = offset === 0;
-
-            return (
-              <motion.div
-                key={perfume.name}
-                animate={{
-                  x: style.x,
-                  scale: style.scale,
-                  opacity: style.opacity,
-                  zIndex: style.z,
-                }}
-                transition={{ type: "spring", stiffness: 200, damping: 28 }}
-                className="absolute"
-                style={{ transformOrigin: "center center" }}
-              >
-                <div
-                  className={`relative rounded-2xl overflow-hidden transition-shadow duration-500 ${
-                    isActive ? "shadow-2xl shadow-primary/30" : ""
-                  }`}
-                >
-                  <video
-                    ref={(el) => { videoRefs.current[i] = el; }}
-                    src={perfume.video}
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    className="w-[340px] md:w-[560px] lg:w-[640px] aspect-video object-cover rounded-2xl"
-                  />
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Arrow controls */}
-        <div className="flex items-center justify-center gap-8 mt-8">
-          <button
-            onClick={() => rotate(-1)}
-            className="w-12 h-12 rounded-full border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/10 transition-colors duration-300"
-            aria-label="Previous perfume"
+    <section id="perfumes" className="py-16 md:py-20 bg-gradient-section">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-card mb-6">
+          <motion.div
+            key={activeSlide}
+            initial={{ opacity: 0.3, scale: 1.03 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.45 }}
+            className="relative h-[300px] sm:h-[360px] md:h-[420px]"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <img
+              src={heroSlides[activeSlide].image}
+              alt={heroSlides[activeSlide].title}
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/35 to-black/10" />
+            <div className="absolute left-5 right-5 bottom-6 sm:left-8 sm:right-8 text-white">
+              <p className="inline-block rounded bg-accent px-2 py-1 text-[11px] font-semibold text-accent-foreground">
+                {heroSlides[activeSlide].promo}
+              </p>
+              <h2 className="font-serif-display mt-3 text-3xl sm:text-4xl">{heroSlides[activeSlide].title}</h2>
+              <p className="font-sans-refined mt-1 text-sm sm:text-base text-white/90 max-w-xl">
+                {heroSlides[activeSlide].subtitle}
+              </p>
+            </div>
+          </motion.div>
+
+          <button
+            onClick={goPrev}
+            aria-label="Previous slide"
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white hover:bg-black/60 flex items-center justify-center"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={goNext}
+            aria-label="Next slide"
+            className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white hover:bg-black/60 flex items-center justify-center"
+          >
+            <ChevronRight className="h-5 w-5" />
           </button>
 
-          <div className="flex gap-2">
-            {perfumes.map((_, i) => (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
+            {heroSlides.map((slide, index) => (
               <button
-                key={i}
-                onClick={() => setActiveIndex(i)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  i === activeIndex
-                    ? "bg-primary w-6"
-                    : "bg-primary/30 hover:bg-primary/50"
+                key={slide.title}
+                onClick={() => setActiveSlide(index)}
+                aria-label={`Go to ${slide.title}`}
+                className={`h-2 rounded-full transition-all ${
+                  activeSlide === index ? "w-6 bg-white" : "w-2 bg-white/55 hover:bg-white/80"
                 }`}
-                aria-label={`Go to perfume ${i + 1}`}
               />
             ))}
           </div>
-
-          <button
-            onClick={() => rotate(1)}
-            className="w-12 h-12 rounded-full border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/10 transition-colors duration-300"
-            aria-label="Next perfume"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
         </div>
 
-        {/* Active perfume info */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeIndex}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.4 }}
-            className="text-center mt-10 max-w-lg mx-auto"
-          >
-            <span className="font-sans-refined text-xs tracking-[0.3em] uppercase text-accent">
-              {perfumes[activeIndex].family}
-            </span>
-            <h3 className="font-serif-display text-3xl md:text-4xl font-medium text-foreground mt-2 mb-3">
-              {perfumes[activeIndex].name}
-            </h3>
-            <p className="font-serif-body text-lg md:text-xl text-muted-foreground leading-relaxed">
-              {perfumes[activeIndex].description}
-            </p>
-          </motion.div>
-        </AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5 }}
+          className="rounded-xl bg-gradient-to-r from-primary to-accent text-primary-foreground px-4 py-5 sm:px-6"
+        >
+          <p className="font-sans-refined text-xs tracking-[0.18em] uppercase opacity-90">
+            AromaLab Perfume Collection
+          </p>
+          <h2 className="font-serif-display text-2xl sm:text-3xl mt-2">
+            Perfume Catalogue
+          </h2>
+          <p className="font-sans-refined text-sm sm:text-base opacity-90 mt-2">
+            Choose your preset impression, or upgrade it with one extra note.
+          </p>
+        </motion.div>
+
+        <div className="mt-6 rounded-xl border border-primary/20 bg-card p-3 sm:p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground mr-2">Sort by</span>
+            {sortOptions.map((option, index) => (
+              <button
+                key={option}
+                className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
+                  index === 0
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-foreground hover:bg-primary/10"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+          {catalogItems.map((item, index) => (
+            <motion.article
+              key={`${item.name}-${index}`}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.35, delay: index * 0.04 }}
+              className="group rounded-lg border border-border bg-card overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-250"
+            >
+              <div className="relative bg-muted">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="aspect-square w-full object-cover"
+                  loading="lazy"
+                />
+                <span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
+                  {item.tag}
+                </span>
+                <span className="absolute right-0 top-0 bg-accent px-2 py-1 text-[10px] font-semibold text-accent-foreground">
+                  -{item.discount}%
+                </span>
+              </div>
+
+              <div className="p-3">
+                <h3 className="text-sm font-medium leading-5 min-h-[2.5rem]">{item.name} Impression</h3>
+
+                <div className="mt-2 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Impression</span>
+                    <span className="text-primary font-semibold">RM {item.impressionPrice}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Impression + 1 Note</span>
+                    <span className="text-primary font-semibold">RM {item.plusNotePrice}</span>
+                  </div>
+                  <div className="text-[11px] text-muted-foreground">
+                    RRP <span className="line-through">RM {item.originalPrice}</span>
+                  </div>
+                </div>
+
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    <span>{item.rating}</span>
+                  </div>
+                  <span>{item.sold} sold</span>
+                </div>
+
+                <div className="mt-2 flex items-center justify-between">
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-sm ${
+                      item.freeShipping
+                        ? "bg-green-100 text-green-700"
+                        : "bg-secondary text-secondary-foreground"
+                    }`}
+                  >
+                    {item.freeShipping ? "Free Shipping" : "Standard Delivery"}
+                  </span>
+                  <button
+                    className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1.5 text-[11px] text-primary-foreground hover:bg-primary/90"
+                    aria-label={`Add ${item.name} to cart`}
+                  >
+                    <ShoppingCart className="h-3.5 w-3.5" />
+                    Add
+                  </button>
+                </div>
+              </div>
+            </motion.article>
+          ))}
+        </div>
       </div>
     </section>
   );
 };
 
-export default PerfumeCarousel;
+export default PerfumeGrid;
