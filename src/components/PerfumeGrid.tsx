@@ -19,6 +19,7 @@ const catalogItems = [
     discount: 30,
     tag: "Best Seller",
     freeShipping: true,
+    availableNotes: ["Pink Pepper", "Jasmine", "Vanilla", "White Musk"],
   },
   {
     name: "Forest Whisper",
@@ -31,6 +32,7 @@ const catalogItems = [
     discount: 27,
     tag: "Mall",
     freeShipping: true,
+    availableNotes: ["Cedarwood", "Vetiver", "Bergamot", "Sandalwood"],
   },
   {
     name: "Mystic Ember",
@@ -43,6 +45,7 @@ const catalogItems = [
     discount: 25,
     tag: "Flash Sale",
     freeShipping: false,
+    availableNotes: ["Oud", "Saffron", "Black Pepper", "Tonka Bean"],
   },
   {
     name: "Sunlit Zest",
@@ -55,6 +58,7 @@ const catalogItems = [
     discount: 32,
     tag: "Just In",
     freeShipping: true,
+    availableNotes: ["Neroli", "Lime Zest", "Green Tea", "Citrus Peel"],
   },
   {
     name: "Caramel Drift",
@@ -67,6 +71,7 @@ const catalogItems = [
     discount: 26,
     tag: "Top Rated",
     freeShipping: false,
+    availableNotes: ["Caramel", "Honey", "Cocoa", "Amber"],
   },
   {
     name: "Blossom Veil Signature",
@@ -79,6 +84,7 @@ const catalogItems = [
     discount: 21,
     tag: "Value Pack",
     freeShipping: true,
+    availableNotes: ["Rose", "Peony", "Iris", "Cashmere Musk"],
   },
   {
     name: "Mystic Ember Discovery",
@@ -91,6 +97,7 @@ const catalogItems = [
     discount: 28,
     tag: "Bundle",
     freeShipping: true,
+    availableNotes: ["Leather", "Dark Vanilla", "Plum", "Incense"],
   },
   {
     name: "Forest Whisper Gift Box",
@@ -103,10 +110,17 @@ const catalogItems = [
     discount: 23,
     tag: "Limited",
     freeShipping: false,
+    availableNotes: ["Oakmoss", "Patchouli", "Tobacco Leaf", "Amberwood"],
   },
 ];
 
 const sortOptions = ["Popular", "Latest", "Top Sales", "Price"];
+type PurchaseType = "impression" | "impression_plus_1_note";
+
+type CardSelection = {
+  purchaseType: PurchaseType;
+  selectedNote: string | null;
+};
 const heroSlides = [
   {
     title: "Blossom Veil",
@@ -136,6 +150,7 @@ const heroSlides = [
 
 const PerfumeGrid = () => {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [cardSelections, setCardSelections] = useState<Record<number, CardSelection>>({});
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -150,6 +165,52 @@ const PerfumeGrid = () => {
 
   const goNext = () => {
     setActiveSlide((prev) => (prev + 1) % heroSlides.length);
+  };
+
+  const getCardSelection = (index: number): CardSelection =>
+    cardSelections[index] ?? { purchaseType: "impression", selectedNote: null };
+
+  const updatePurchaseType = (index: number, purchaseType: PurchaseType) => {
+    setCardSelections((prev) => ({
+      ...prev,
+      [index]: {
+        purchaseType,
+        selectedNote:
+          purchaseType === "impression" ? null : (prev[index]?.selectedNote ?? null),
+      },
+    }));
+  };
+
+  const updateSelectedNote = (index: number, selectedNote: string) => {
+    setCardSelections((prev) => ({
+      ...prev,
+      [index]: {
+        purchaseType: "impression_plus_1_note",
+        selectedNote: selectedNote || null,
+      },
+    }));
+  };
+
+  const handleAdd = (item: (typeof catalogItems)[number], index: number) => {
+    const selection = getCardSelection(index);
+    const isPlusNote = selection.purchaseType === "impression_plus_1_note";
+    const unitPrice = isPlusNote ? item.plusNotePrice : item.impressionPrice;
+
+    const payload = {
+      productName: item.name,
+      purchaseType: selection.purchaseType,
+      selectedNote: isPlusNote ? selection.selectedNote : null,
+      unitPrice,
+    };
+
+    // Placeholder until cart integration is added.
+    console.log("Add to cart payload:", payload);
+
+    // Reset predictably after add.
+    setCardSelections((prev) => ({
+      ...prev,
+      [index]: { purchaseType: "impression", selectedNote: null },
+    }));
   };
 
   return (
@@ -247,74 +308,143 @@ const PerfumeGrid = () => {
 
         <div className="mt-6 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {catalogItems.map((item, index) => (
-            <motion.article
-              key={`${item.name}-${index}`}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.35, delay: index * 0.04 }}
-              className="group rounded-lg border border-border bg-card overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-250"
-            >
-              <div className="relative bg-muted">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="aspect-square w-full object-cover"
-                  loading="lazy"
-                />
-                <span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
-                  {item.tag}
-                </span>
-                <span className="absolute right-0 top-0 bg-accent px-2 py-1 text-[10px] font-semibold text-accent-foreground">
-                  -{item.discount}%
-                </span>
-              </div>
+            (() => {
+              const selection = getCardSelection(index);
+              const isPlusNote = selection.purchaseType === "impression_plus_1_note";
+              const selectedPrice = isPlusNote ? item.plusNotePrice : item.impressionPrice;
+              const addDisabled = isPlusNote && !selection.selectedNote;
 
-              <div className="p-3">
-                <h3 className="text-sm font-medium leading-5 min-h-[2.5rem]">{item.name} Impression</h3>
+              return (
+                <motion.article
+                  key={`${item.name}-${index}`}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.35, delay: index * 0.04 }}
+                  className="group rounded-lg border border-border bg-card overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-250"
+                >
+                  <div className="relative bg-muted">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="aspect-square w-full object-cover"
+                      loading="lazy"
+                    />
+                    <span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
+                      {item.tag}
+                    </span>
+                    <span className="absolute right-0 top-0 bg-accent px-2 py-1 text-[10px] font-semibold text-accent-foreground">
+                      -{item.discount}%
+                    </span>
+                  </div>
 
-                <div className="mt-2 space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Impression</span>
-                    <span className="text-primary font-semibold">RM {item.impressionPrice}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Impression + 1 Note</span>
-                    <span className="text-primary font-semibold">RM {item.plusNotePrice}</span>
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    RRP <span className="line-through">RM {item.originalPrice}</span>
-                  </div>
-                </div>
+                  <div className="p-3">
+                    <h3 className="text-sm font-medium leading-5 min-h-[2.5rem]">{item.name}</h3>
 
-                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    <span>{item.rating}</span>
-                  </div>
-                  <span>{item.sold} sold</span>
-                </div>
+                    <div className="mt-2 rounded-md bg-background border border-border p-1 flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => updatePurchaseType(index, "impression")}
+                        className={`flex-1 rounded px-2 py-1.5 text-[11px] font-medium transition-colors ${
+                          selection.purchaseType === "impression"
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-primary/10"
+                        }`}
+                      >
+                        Impression
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updatePurchaseType(index, "impression_plus_1_note")}
+                        className={`flex-1 rounded px-2 py-1.5 text-[11px] font-medium transition-colors ${
+                          selection.purchaseType === "impression_plus_1_note"
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-primary/10"
+                        }`}
+                      >
+                        + 1 Note
+                      </button>
+                    </div>
 
-                <div className="mt-2 flex items-center justify-between">
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded-sm ${
-                      item.freeShipping
-                        ? "bg-green-100 text-green-700"
-                        : "bg-secondary text-secondary-foreground"
-                    }`}
-                  >
-                    {item.freeShipping ? "Free Shipping" : "Standard Delivery"}
-                  </span>
-                  <button
-                    className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1.5 text-[11px] text-primary-foreground hover:bg-primary/90"
-                    aria-label={`Add ${item.name} to cart`}
-                  >
-                    <ShoppingCart className="h-3.5 w-3.5" />
-                    Add
-                  </button>
-                </div>
-              </div>
-            </motion.article>
+                    {isPlusNote && (
+                      <div className="mt-2">
+                        <label
+                          htmlFor={`note-select-${index}`}
+                          className="block text-[11px] text-muted-foreground mb-1"
+                        >
+                          Select your extra note
+                        </label>
+                        <select
+                          id={`note-select-${index}`}
+                          value={selection.selectedNote ?? ""}
+                          onChange={(e) => updateSelectedNote(index, e.target.value)}
+                          className="w-full rounded-md border border-input bg-background px-2.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                        >
+                          <option value="">Choose one note</option>
+                          {item.availableNotes.map((note) => (
+                            <option key={note} value={note}>
+                              {note}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    <div className="mt-2">
+                      <span className="text-primary font-semibold text-lg">RM {selectedPrice}</span>
+                    </div>
+
+                    <div className="mt-1.5 space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Impression</span>
+                        <span className="text-foreground">RM {item.impressionPrice}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Impression + 1 Note</span>
+                        <span className="text-foreground">RM {item.plusNotePrice}</span>
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        RRP <span className="line-through">RM {item.originalPrice}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <span>{item.rating}</span>
+                      </div>
+                      <span>{item.sold} sold</span>
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between">
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-sm ${
+                          item.freeShipping
+                            ? "bg-green-100 text-green-700"
+                            : "bg-secondary text-secondary-foreground"
+                        }`}
+                      >
+                        {item.freeShipping ? "Free Shipping" : "Standard Delivery"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleAdd(item, index)}
+                        disabled={addDisabled}
+                        className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] ${
+                          addDisabled
+                            ? "bg-primary/40 text-primary-foreground/70 cursor-not-allowed"
+                            : "bg-primary text-primary-foreground hover:bg-primary/90"
+                        }`}
+                        aria-label={`Add ${item.name} to cart`}
+                      >
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                </motion.article>
+              );
+            })()
           ))}
         </div>
       </div>
